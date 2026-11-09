@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDGs 性別平權</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            font-family: 'Noto Sans TC', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Village Map Sand/Grass Texture Background */
+        .map-bg {
+            background-color: #86efac;
+            background-image: 
+                radial-gradient(#4ade80 2px, transparent 2px),
+                radial-gradient(#22c55e 1px, #86efac 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        /* Glassmorphism Top Bar */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* Thatched Hut Hover & Animation */
+        .hut-card {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.25));
+        }
+        .hut-card:hover {
+            transform: scale(1.12) translateY(-6px);
+            filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.35));
+            z-index: 30;
+        }
+
+        .hut-completed {
+            filter: drop-shadow(0 0 14px rgba(34, 197, 94, 0.8)) !important;
+        }
+
+        /* Pulse animation for active hut badge */
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.85; }
+        }
+        .animate-hut-pulse {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex flex-col overflow-hidden bg-slate-900 justify-between">
+
+    <!-- HEADER / TOP BAR -->
+    <header class="w-full z-40 p-3 sm:p-4 glass-header shadow-md flex justify-between items-center gap-2">
+        <!-- Title Left -->
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-pink-500 to-rose-400 text-white p-2.5 sm:p-3 rounded-2xl shadow-md flex items-center justify-center">
+                <i class="fa-solid fa-venus-mars text-2xl sm:text-3xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-800 tracking-tight leading-none">
+                    SDGs 性別平權
+                </h1>
+                <p class="text-xs sm:text-sm text-pink-700 font-bold mt-1 flex items-center gap-1">
+                    <span class="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-full text-xs font-extrabold">SDG 5 平等村莊</span>
+                    <span class="hidden sm:inline">探索 10 座茅草屋・消除性別偏見</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Score Counter Right -->
+        <div class="flex items-center gap-3">
+            <div class="bg-white/90 border-2 border-pink-300 px-4 py-2 rounded-2xl text-center shadow-md flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-[10px] sm:text-xs text-slate-500 font-extrabold uppercase">答對題數</div>
+                    <div class="text-xl sm:text-2xl font-black text-pink-600 leading-none">
+                        <span id="score-count">0</span> <span class="text-slate-400 text-base font-bold">/ 10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN GAME VILLAGE MAP -->
+    <main class="relative w-full flex-1 map-bg overflow-hidden flex items-center justify-center p-4">
+        
+        <!-- SVG Paths for Village Roads -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 120 150 Q 250 80, 450 180 T 800 220 T 1100 160" fill="none" stroke="#d97706" stroke-width="24" stroke-dasharray="12 6"/>
+            <path d="M 200 450 Q 400 350, 600 500 T 950 420" fill="none" stroke="#d97706" stroke-width="24" stroke-dasharray="12 6"/>
+            <path d="M 450 180 L 400 380" fill="none" stroke="#d97706" stroke-width="20" stroke-dasharray="8 4"/>
+            <path d="M 800 220 L 750 460" fill="none" stroke="#d97706" stroke-width="20" stroke-dasharray="8 4"/>
+        </svg>
+
+        <!-- Decorative Village Elements (Trees, Rocks) -->
+        <div class="absolute top-10 left-8 text-emerald-700/60 text-4xl pointer-events-none"><i class="fa-solid fa-tree"></i></div>
+        <div class="absolute top-24 left-36 text-emerald-800/50 text-5xl pointer-events-none"><i class="fa-solid fa-tree"></i></div>
+        <div class="absolute bottom-12 left-16 text-emerald-700/60 text-5xl pointer-events-none"><i class="fa-solid fa-tree"></i></div>
+        <div class="absolute top-8 right-24 text-emerald-800/60 text-5xl pointer-events-none"><i class="fa-solid fa-tree"></i></div>
+        <div class="absolute bottom-20 right-12 text-emerald-700/60 text-6xl pointer-events-none"><i class="fa-solid fa-tree"></i></div>
+        <div class="absolute top-1/2 right-8 text-amber-900/30 text-2xl pointer-events-none"><i class="fa-solid fa-mountain"></i></div>
+
+        <!-- 10 Thatched Huts Interactive Container -->
+        <div id="village-map" class="relative w-full max-w-6xl h-full flex items-center justify-center">
+            <!-- Huts will be positioned dynamically here via JS -->
+        </div>
+    </main>
+
+    <!-- QUESTION MODAL OVERLAY -->
+    <div id="quiz-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border-4 border-pink-300 transform transition-all relative">
+            
+            <!-- Hut Badge Top Header -->
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <span id="modal-hut-tag" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-xl text-xs font-black shadow-sm">
+                        茅草屋 #1
+                    </span>
+                    <span class="text-xs font-extrabold text-slate-400">SDG 5 性別平等小會考</span>
+                </div>
+                <button id="btn-close-quiz" class="text-slate-400 hover:text-slate-600 text-xl w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Question Text -->
+            <h3 id="modal-question" class="text-lg sm:text-xl font-black text-slate-800 leading-snug mb-6">
+                題目載入中...
+            </h3>
+
+            <!-- Options Container -->
+            <div id="modal-options" class="space-y-3 mb-4">
+                <!-- Dynamic options injected here -->
+            </div>
+
+            <!-- Feedback Bar -->
+            <div id="modal-feedback" class="hidden p-3 rounded-2xl text-center font-bold text-sm"></div>
+        </div>
+    </div>
+
+    <!-- RESULT / STAGE COMPLETION MODAL -->
+    <div id="result-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl border-4 border-slate-200">
+            
+            <!-- Icon Indicator -->
+            <div id="result-icon-box" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl shadow-inner">
+                <i id="result-icon" class="fa-solid fa-trophy"></i>
+            </div>
+            
+            <h2 id="result-title" class="text-3xl font-black text-slate-800 mb-2">挑戰結束</h2>
+            <p id="result-desc" class="text-sm font-semibold text-slate-600 mb-6">更詳細的成績結算與分析如下：</p>
+
+            <!-- Score Summary Box -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-6 space-y-3">
+                <div class="flex justify-between items-center text-sm font-bold text-slate-600">
+                    <span>回答總題數</span>
+                    <span class="text-slate-800">10 題</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-bold text-slate-600">
+                    <span>正確答對題數</span>
+                    <span id="result-score-text" class="text-2xl font-black text-pink-600">0 / 10</span>
+                </div>
+                <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                    <div id="result-bar" class="h-full bg-pink-500 transition-all duration-700" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Modal Action Button -->
+            <div id="result-action-box">
+                <!-- Dynamic button (Reload or Next Level) -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        // 10 Gender Equality (SDG 5) Questions
+        const QUESTIONS = [
+            {
+                id: 1,
+                hutName: "茅草屋 #1",
+                question: "同工同酬是性別平等的重要指標。職場上不論性別，只要工作內容與績效相同，薪資應該如何發放？",
+                options: [
+                    "無分性別，給予完全相同的薪資報酬",
+                    "男性因為是家庭經濟支柱，應發放較高薪資",
+                    "女性請假機率較高，薪資應適當打折",
+                    "依據僱主的個人喜好隨機調整"
+                ],
+                answer: 0
+            },
+            {
+                id: 2,
+                hutName: "茅草屋 #2",
+                question: "關於家務分擔與照顧家人，下列哪一種觀念最符合現代性別平等的精神？",
+                options: [
+                    "家務是女性的專屬責任",
+                    "男性只需要出錢，完全不需要幫忙做家務",
+                    "家庭成員不分性別，共同分擔家務與照顧責任",
+                    "由年紀最小的家庭成員全權負責"
+                ],
+                answer: 2
+            },
+            {
+                id: 3,
+                hutName: "茅草屋 #3",
+                question: "在選擇學科與未來職涯（例如：科技工程或護理幼教）時，應該如何考量？",
+                options: [
+                    "男生只能選理工，女生只能選文教",
+                    "依據個人的興趣、能力與志向自由選擇，不受性別刻板印象限制",
+                    "完全聽從社會傳統觀念決定",
+                    "女生不適合從事高科技與科學研究"
+                ],
+                answer: 1
+            },
+            {
+                id: 4,
+                hutName: "茅草屋 #4",
+                question: "聯合國永續發展目標 SDGs 中，促進「性別平等」是第幾項目標？",
+                options: ["SDG 1", "SDG 3", "SDG 5", "SDG 10"],
+                answer: 2
+            },
+            {
+                id: 5,
+                hutName: "茅草屋 #5",
+                question: "當看到傳統喜慶場合（如結婚婚俗）中有隱含貶抑女性的習俗時，我們應該具備何種態度？",
+                options: [
+                    "遵守所有舊習俗，不可改變",
+                    "以平等、相互尊重的態度共同討論與現代調整",
+                    "完全取消所有傳統文化",
+                    "強制一方必須聽從另一方"
+                ],
+                answer: 1
+            },
+            {
+                id: 6,
+                hutName: "茅草屋 #6",
+                question: "提升女性在政治、經濟與公共事務決策層面的參與比例，有什麼積極意義？",
+                options: [
+                    "沒有意義，會降低效率",
+                    "多元的視角有助於制定更全面、包容的公共政策與決策",
+                    "只是一種形式上的宣傳手段",
+                    "會造成職場競爭過度激烈"
+                ],
+                answer: 1
+            },
+            {
+                id: 7,
+                hutName: "茅草屋 #7",
+                question: "遇到任何形式的性騷擾或性別歧視時，正確的處理方式是什麼？",
+                options: [
+                    "忍氣吞聲，當作沒發生",
+                    "檢討受害者的穿著或言行",
+                    "勇敢表達不適，並透過正當管道申訴求助",
+                    "在網路上隨意攻擊他人"
+                ],
+                answer: 2
+            },
+            {
+                id: 8,
+                hutName: "茅草屋 #8",
+                question: "「男性不可以流眼淚，女性不可以太有主見」，這種說法屬於什麼現象？",
+                options: [
+                    "科學證實的生理差異",
+                    "傳統的性別刻板印象枷鎖",
+                    "值得鼓勵的良好品質",
+                    "法律強行規定的條款"
+                ],
+                answer: 1
+            },
+            {
+                id: 9,
+                hutName: "茅草屋 #9",
+                question: "保障不同性別者皆能獲得優質教育與醫療資源的權利，這稱為？",
+                options: [
+                    "教育與健康特權",
+                    "基本人權與性別平等保障",
+                    "過度的社會福利",
+                    "不合理的競爭補貼"
+                ],
+                answer: 1
+            },
+            {
+                id: 10,
+                hutName: "茅草屋 #10",
+                question: "在育兒假（育嬰留職停薪）的申請上，下列何者正確？",
+                options: [
+                    "只有媽媽可以申請",
+                    "只有爸爸可以申請",
+                    "父母雙方皆有權依法申請，共同陪伴孩子成長",
+                    "申請育嬰假屬於違法行為"
+                ],
+                answer: 2
+            }
+        ];
+
+        // Hut Fixed Coordinate Offsets (percentages inside map container for responsive layout)
+        const HUT_POSITIONS = [
+            { top: '15%', left: '10%' },
+            { top: '8%',  left: '42%' },
+            { top: '12%', left: '76%' },
+            { top: '38%', left: '26%' },
+            { top: '35%', left: '58%' },
+            { top: '42%', left: '84%' },
+            { top: '65%', left: '8%' },
+            { top: '68%', left: '38%' },
+            { top: '64%', left: '66%' },
+            { top: '78%', left: '82%' }
+        ];
+
+        // Game State
+        let correctCount = 0;
+        let answeredHuts = new Set();
+        let activeHutIndex = null;
+
+        // DOM Elements
+        const villageMap = document.getElementById('village-map');
+        const scoreCountDisplay = document.getElementById('score-count');
+        
+        const quizModal = document.getElementById('quiz-modal');
+        const modalHutTag = document.getElementById('modal-hut-tag');
+        const modalQuestion = document.getElementById('modal-question');
+        const modalOptions = document.getElementById('modal-options');
+        const modalFeedback = document.getElementById('modal-feedback');
+        const btnCloseQuiz = document.getElementById('btn-close-quiz');
+
+        const resultModal = document.getElementById('result-modal');
+        const resultIconBox = document.getElementById('result-icon-box');
+        const resultIcon = document.getElementById('result-icon');
+        const resultTitle = document.getElementById('result-title');
+        const resultDesc = document.getElementById('result-desc');
+        const resultScoreText = document.getElementById('result-score-text');
+        const resultBar = document.getElementById('result-bar');
+        const resultActionBox = document.getElementById('result-action-box');
+
+        // Web Audio Synthesizer
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+        }
+
+        function playSound(isCorrect) {
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (isCorrect) {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(174.61, now + 0.15); // F3
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch (e) {}
+        }
+
+        /**
+         * Render 10 Thatched Huts on Village Map
+         */
+        function renderVillageHuts() {
+            villageMap.innerHTML = '';
+
+            QUESTIONS.forEach((q, idx) => {
+                const pos = HUT_POSITIONS[idx];
+                const isCompleted = answeredHuts.has(idx);
+
+                const hutEl = document.createElement('div');
+                hutEl.className = `absolute hut-card cursor-pointer ${isCompleted ? 'hut-completed' : ''}`;
+                hutEl.style.top = pos.top;
+                hutEl.style.left = pos.left;
+
+                // Thatched Hut SVG & Label
+                hutEl.innerHTML = `
+                    <div class="relative flex flex-col items-center group">
+                        <!-- Badge Tag -->
+                        <div class="mb-1 px-2.5 py-0.5 rounded-full text-[11px] font-black shadow-md transition ${
+                            isCompleted 
+                            ? 'bg-emerald-500 text-white' 
+                            : 'bg-amber-100 text-amber-900 border border-amber-300 group-hover:bg-amber-400'
+                        }">
+                            ${isCompleted ? '<i class="fa-solid fa-circle-check"></i> 完成' : q.hutName}
+                        </div>
+
+                        <!-- Thatched Hut Graphic -->
+                        <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                <!-- Roof / Thatch -->
+                                <path d="M 50 10 L 5 45 L 95 45 Z" fill="#d97706" stroke="#92400e" stroke-width="3"/>
+                                <path d="M 50 10 L 20 45 M 50 10 L 35 45 M 50 10 L 65 45 M 50 10 L 80 45" stroke="#b45309" stroke-width="2"/>
+                                <!-- House Wall -->
+                                <rect x="18" y="44" width="64" height="46" rx="4" fill="#fef3c7" stroke="#92400e" stroke-width="3"/>
+                                <!-- Door -->
+                                <rect x="38" y="58" width="24" height="32" rx="2" fill="${isCompleted ? '#22c55e' : '#78350f'}" stroke="#451a03" stroke-width="2"/>
+                                <circle cx="44" cy="74" r="2" fill="#fef3c7"/>
+                                <!-- Windows -->
+                                <rect x="24" y="52" width="10" height="10" fill="#38bdf8" stroke="#78350f" stroke-width="1.5"/>
+                                <rect x="66" y="52" width="10" height="10" fill="#38bdf8" stroke="#78350f" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+
+                hutEl.onclick = () => openQuizModal(idx);
+                villageMap.appendChild(hutEl);
+            });
+        }
+
+        /**
+         * Open Quiz Modal for Selected Hut
+         */
+        function openQuizModal(idx) {
+            if (answeredHuts.has(idx)) {
+                return; // Already answered
+            }
+
+            activeHutIndex = idx;
+            const q = QUESTIONS[idx];
+
+            modalHutTag.innerText = q.hutName;
+            modalQuestion.innerText = q.question;
+            modalFeedback.className = "hidden";
+            modalOptions.innerHTML = '';
+
+            q.options.forEach((optText, optIdx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-slate-50 hover:bg-pink-50 hover:border-pink-300 text-slate-800 font-bold p-3.5 rounded-2xl border-2 border-slate-200 transition text-left text-sm sm:text-base flex items-center justify-between active:scale-98 shadow-sm";
+                btn.innerHTML = `
+                    <span>${String.fromCharCode(65 + optIdx)}. ${optText}</span>
+                    <i class="fa-regular fa-circle text-slate-300"></i>
+                `;
+                btn.onclick = () => handleAnswerSelect(optIdx);
+                modalOptions.appendChild(btn);
+            });
+
+            quizModal.classList.remove('hidden');
+        }
+
+        /**
+         * Process Selected Answer
+         */
+        function handleAnswerSelect(selectedIdx) {
+            const q = QUESTIONS[activeHutIndex];
+            const isCorrect = selectedIdx === q.answer;
+
+            // Mark answered
+            answeredHuts.add(activeHutIndex);
+
+            if (isCorrect) {
+                correctCount++;
+                scoreCountDisplay.innerText = correctCount;
+                playSound(true);
+
+                modalFeedback.innerText = "🎉 回答正確！太棒了，性別平權觀念非常清晰！";
+                modalFeedback.className = "p-3 rounded-2xl text-center font-bold text-sm bg-emerald-100 text-emerald-800 border border-emerald-300 block";
+            } else {
+                playSound(false);
+                modalFeedback.innerText = `❌ 回答錯誤！正確答案是：${String.fromCharCode(65 + q.answer)}. ${q.options[q.answer]}`;
+                modalFeedback.className = "p-3 rounded-2xl text-center font-bold text-sm bg-rose-100 text-rose-800 border border-rose-300 block";
+            }
+
+            // Disable all option buttons
+            const optionBtns = modalOptions.querySelectorAll('button');
+            optionBtns.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === q.answer) {
+                    btn.className = "w-full bg-emerald-100 text-emerald-900 font-extrabold p-3.5 rounded-2xl border-2 border-emerald-400 text-left text-sm sm:text-base flex items-center justify-between shadow-sm";
+                    btn.querySelector('i').className = "fa-solid fa-circle-check text-emerald-600";
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.className = "w-full bg-rose-100 text-rose-900 font-extrabold p-3.5 rounded-2xl border-2 border-rose-400 text-left text-sm sm:text-base flex items-center justify-between shadow-sm";
+                    btn.querySelector('i').className = "fa-solid fa-circle-xmark text-rose-600";
+                }
+            });
+
+            // Refresh Map to show green hut status
+            renderVillageHuts();
+
+            // Auto Close Modal after delay & check overall progress
+            setTimeout(() => {
+                quizModal.classList.add('hidden');
+                
+                // Check if all 10 huts answered
+                if (answeredHuts.size === 10) {
+                    showFinalResult();
+                }
+            }, 1800);
+        }
+
+        /**
+         * Show Game Settlement Modal (Final Result)
+         */
+        function showFinalResult() {
+            resultScoreText.innerText = `${correctCount} / 10`;
+            resultBar.style.width = `${(correctCount / 10) * 100}%`;
+
+            if (correctCount < 8) {
+                // FAIL CONDITION (< 8)
+                resultIconBox.className = "w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl bg-rose-100 text-rose-500 shadow-inner";
+                resultIcon.className = "fa-solid fa-rotate-left";
+                resultTitle.innerText = "再接再厲！";
+                resultDesc.innerText = "答對題數未達 8 題標準，建議重新複習性別平權知識並重新挑戰！";
+
+                resultActionBox.innerHTML = `
+                    <button onclick="window.location.reload()" class="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg hover:shadow-xl active:scale-95 transition text-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>重新挑戰</span>
+                    </button>
+                `;
+            } else {
+                // SUCCESS CONDITION (>= 8)
+                resultIconBox.className = "w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl bg-emerald-100 text-emerald-500 shadow-inner";
+                resultIcon.className = "fa-solid fa-trophy animate-bounce";
+                resultTitle.innerText = "挑戰成功！恭喜晉級";
+                resultDesc.innerText = "太棒了！您具備優異的 SDG 5 性別平權意識，順利解鎖下一關通道！";
+
+                resultActionBox.innerHTML = `
+                    <a href="level2.html" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg hover:shadow-xl active:scale-95 transition text-lg flex items-center justify-center gap-2">
+                        <span>前往下一關</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                `;
+            }
+
+            resultModal.classList.remove('hidden');
+        }
+
+        // Modal Close Button
+        btnCloseQuiz.onclick = () => {
+            quizModal.classList.add('hidden');
+        };
+
+        // Initialize Map
+        window.onload = () => {
+            renderVillageHuts();
+        };
+    </script>
+</body>
+</html>
